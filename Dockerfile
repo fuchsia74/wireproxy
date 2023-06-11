@@ -4,12 +4,13 @@ FROM golang:1.18 as build
 WORKDIR /usr/src/wireproxy
 COPY . .
 
-RUN make
+RUN export GO111MODULE=on && export GOPROXY=https://goproxy.cn && make
 
 # Now copy it into our base image.
-FROM gcr.io/distroless/static-debian11:nonroot
+FROM alpine:3.18
 COPY --from=build /usr/src/wireproxy/wireproxy /usr/bin/wireproxy
 
+RUN mkdir /etc/wireproxy
 VOLUME [ "/etc/wireproxy"]
 ENTRYPOINT [ "/usr/bin/wireproxy" ]
 CMD [ "--config", "/etc/wireproxy/config" ]
